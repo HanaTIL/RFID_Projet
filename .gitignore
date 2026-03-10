@@ -1,0 +1,23 @@
+# --- Compiled Binaries ---
+*.o
+*.so
+admin_tool
+rfid_daemon
+
+# --- Databases (Keep these private!) ---
+*.db
+security.db
+datalogger.db
+
+# --- Linux System files ---
+/tmp/rfid.sock
+.DS_Store
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- IDE folders ---
+.vscode/
+.idea/

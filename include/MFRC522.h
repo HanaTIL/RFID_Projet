@@ -5,8 +5,8 @@
  *      Author: nxf86731
  */
 
-#ifndef GB_MMFRC522_H_
-#define GB_MMFRC522_H_
+#ifndef MMFRC522_H_
+#define MMFRC522_H_
 #include "stdint.h"
 #include "stdbool.h"
 
@@ -31,15 +31,6 @@ to 1 define the address and the LSB is set to logic 0.
 */
 
 
-typedef enum
-{
-    /* Generic error codes */
-    STATUS_SUCCESS                         = 0x000U,    /*!< Generic operation success status */
-    STATUS_ERROR                           = 0x001U,    /*!< Generic operation failure status */
-    STATUS_BUSY                            = 0x002U,    /*!< Generic operation busy status */
-    STATUS_TIMEOUT                         = 0x003U,    /*!< Generic operation timeout status */
-    STATUS_UNSUPPORTED                     = 0x004U,    /*!< Generic operation unsupported status */
-} status_t;
 
 typedef enum PCD_Register {
 	// Page 0: Command and status
@@ -236,10 +227,20 @@ bool checkCRC       //In: True => The last 2 bytes of the response is assumed to
 		byte		sak;			// The SAK (Select acknowledge) byte returned from the PICC after successful selection.
 	} Uid;
 extern Uid UID_t;
-MFRC522_statusCodes_t PICC_REQA_OR_WUPA(byte command, byte *gb_bufferATQA, byte *gb_buffersize);
+
+typedef enum
+{
+    /* Generic error codes */
+    STATUS_SUCCESS                         = 0x000U,    /*!< Generic operation success status */
+    STATUS_ERROR                           = 0x001U,    /*!< Generic operation failure status */
+    STATUS_BUSY                            = 0x002U,    /*!< Generic operation busy status */
+    STATUS_TIMEOUT                         = 0x003U,    /*!< Generic operation timeout status */
+    STATUS_UNSUPPORTED                     = 0x004U,    /*!< Generic operation unsupported status */
+} status_t;
+MFRC522_statusCodes_t PICC_REQA_OR_WUPA(byte command, byte *bufferATQA, byte *buffersize);
 
 
-MFRC522_statusCodes_t PICC_RequestA(byte * gb_bufferATQ, byte *gb_buffersize);
+MFRC522_statusCodes_t PICC_RequestA(byte * bufferATQ, byte *buffersize);
 
 
 
@@ -249,10 +250,14 @@ bool PICC_IsNewCardPresent(void);
 bool PICC_ReadCardSerial(void);
 void PICCDetails(Uid *uid);
 
-MFRC522_statusCodes_t MIFARE_Authenticate(PICC_Command_t key, byte blockAddr, Uid *uid);
-MFRC522_statusCodes_t MIFARE_Write(PICC_Command_t key, byte blockAddr, byte *buffer);
-MFRC522_statusCodes_t MIFARE_Read(PICC_Command_t key, byte blockAddr, byte *backData);
+MFRC522_statusCodes_t MIFARE_Authenticate(PICC_Command_t key, byte blockAddr, byte *customKey, Uid *uid);
+
+MFRC522_statusCodes_t MIFARE_Write(PICC_Command_t key, byte blockAddr, byte *customKey, byte *buffer);
+
+MFRC522_statusCodes_t MIFARE_Read(PICC_Command_t key, byte blockAddr,byte *customKey, byte *backData);
+
 MFRC522_statusCodes_t MIFARE_WriteDataRaw(byte *data, byte len);
+
 MFRC522_statusCodes_t MIFARE_StopSession(); 
 
 

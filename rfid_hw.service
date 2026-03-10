@@ -1,0 +1,17 @@
+[Unit]
+Description=MFRC522 Hardware Interface Daemon
+After=network.target
+
+[Service]
+# Replace /home/hana/RFID_Module with your actual path
+WorkingDirectory=/home/hana/RFID_Module
+ExecStart=/home/hana/RFID_Module/rfid_daemon
+# This tells the loader where to find your libmfrc522.so
+Environment=LD_LIBRARY_PATH=/home/hana/RFID_Module
+
+Restart=always
+RestartSec=3
+User=root
+PrivateTmp=no
+[Install]
+WantedBy=multi-user.target

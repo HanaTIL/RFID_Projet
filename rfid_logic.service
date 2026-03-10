@@ -1,0 +1,15 @@
+[Unit]
+Description=RFID Access Control Logic (Python)
+# This ensures Python doesn't start until the C Socket is ready
+After=rfid_hw.service
+Requires=rfid_hw.service
+
+[Service]
+WorkingDirectory=/home/hana/RFID_Module
+ExecStart=/usr/bin/python3 -u /home/hana/RFID_Module/gateKeeper.py
+Restart=always
+RestartSec=5
+User=root
+PrivateTmp=no
+[Install]
+WantedBy=multi-user.target

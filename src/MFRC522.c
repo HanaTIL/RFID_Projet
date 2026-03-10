@@ -24,7 +24,6 @@
 
 
 
-// Member variables
 Uid UID_t;
 
 
@@ -646,7 +645,7 @@ void PICCDetails(Uid *uid)
     //  Print the SAK (Select Acknowledge) byte
     printf("Card SAK: %02X\n", uid->sak);
 }
-MFRC522_statusCodes_t MIFARE_Authenticate(PICC_Command_t key, byte blockAddr, Uid *uid)
+MFRC522_statusCodes_t MIFARE_Authenticate(PICC_Command_t key, byte blockAddr, byte *customKey, Uid *uid)
 {
 	byte irqReg;
 	byte MFCryptoValue;
@@ -655,7 +654,8 @@ MFRC522_statusCodes_t MIFARE_Authenticate(PICC_Command_t key, byte blockAddr, Ui
 
 	data[0] = key; 
     data[1] = blockAddr;
-    memset(&data[2], 0xFF, 6);
+    //memset(&data[2], 0xFF, 6);
+	memcpy(&data[2], customKey, 6);
 	memcpy(&data[8], UID_t.uidByte, 4); //uid->uidByte
 
 	/*for (byte i = 8; i < length; i++) {
@@ -692,86 +692,64 @@ MFRC522_statusCodes_t MIFARE_Authenticate(PICC_Command_t key, byte blockAddr, Ui
 
 }
 MFRC522_statusCodes_t MIFARE_WriteDataRaw(byte *data, byte len) {
-    // 1. CLEAR interrupts
-    MFRC522_WriteRegister(ComIrqReg, 0x7F);
-
-    // 2. FLUSH FIFO
-    MFRC522_WriteRegister(FIFOLevelReg, 0x80);
-
-    // 3. LOAD the 18 bytes (16 data + 2 CRC)
-    MFRC522_WriteRegister_Multi(FIFODataReg, len, data);
-
-    // 4. FORCE BitFraming to 0x00 (The "Secret" fix)
-    // This ensures we send all 8 bits of every byte!
-    MFRC522_WriteRegister(BitFramingReg, 0x00);
-
-    // 5. START the transceive
-    MFRC522_WriteRegister(CommandReg, PCD_Transceive);
+    MFRC522_WriteRegister(ComIrqReg, 0x7F);     // CLEAR interrupts
+    MFRC522_WriteRegister(FIFOLevelReg, 0x80);    //FLUSH FIFO
+    MFRC522_WriteRegister_Multi(FIFODataReg, len, data);     // LOAD the 18 bytes (16 data + 2 CRC)
+    // FORCE BitFraming to 0x00
+    MFRC522_WriteRegister(BitFramingReg, 0x00);     // This ensures we send all 8 bits of every byte!
+    MFRC522_WriteRegister(CommandReg, PCD_Transceive);     // START the transceive
     MFRC522_SetRegisterBitmask(BitFramingReg, 0x80); // StartSend = 1
-
-    // 6. WAIT (As per your Table 25: 10ms)
-    usleep(10000); 
-
-    // 7. Check for ACK (0x0A) or Error
-    byte irq = MFRC522_ReadRegister(ComIrqReg);
+    usleep(10000);      // Wait (10ms)
+    byte irq = MFRC522_ReadRegister(ComIrqReg);     // Check for ACK (0x0A) or Error
     if (irq & 0x01) return STATUS_TIMEOUT; // Timer expired
     
     return MFRC522_STATUS_OK;
 }
 
-MFRC522_statusCodes_t MIFARE_Write(PICC_Command_t key, byte blockAddr, byte *buffer)
+MFRC522_statusCodes_t MIFARE_Write(PICC_Command_t key, byte blockAddr, byte *customKey, byte *buffer)
 { 
 	MFRC522_statusCodes_t result;
 	MFRC522_statusCodes_t status;
-
+	byte dataBuffer[18];
 	byte commandBuffer[4];
 	commandBuffer[0] = PICC_CMD_MF_WRITE; // MIFARE_WRITE command
     commandBuffer[1] = blockAddr;
 
-	result = MIFARE_Authenticate(key, blockAddr, &UID_t);
+	result = MIFARE_Authenticate(key, blockAddr, customKey, &UID_t);
 	if(result != MFRC522_STATUS_AUTHEN )
 	{
 		//printf("Authentication failed\n");
 		return result;
 	}
-	/*byte status2 = MFRC522_ReadRegister(Status2Reg);
-	if (!(status2 & 0x08)) {
-    printf("[DEBUG] Crypto bit dropped! Authentication lost.\n");
-}*/
+	
     PCD_CalculateCRC(commandBuffer, 2, &commandBuffer[2]); 
 
 	status = MFRC522_TransceiveData(commandBuffer, 4, NULL, 0, NULL, 0, 0); // WE send write command with block adress we want to write to, 
 	if (status != MFRC522_STATUS_OK)
 	{
-		/*printf("command key failed\n");
-		byte errorReg = MFRC522_ReadRegister(ErrorReg); // Register 0x06
-    printf("[DEBUG] ErrorReg Value: 0x%02X\n", errorReg);*/
-    printf("status key: %d", status);
-
+    //printf("status key: %d", status);
     return status;
     }
-	byte dataBuffer[18];
-    memcpy(dataBuffer, buffer, 16); // Copy your "Hana Til"
+    memcpy(dataBuffer, buffer, 16); 
     
-    // Manually calculate and "fill" the last 2 bytes of the 18-byte block
-    PCD_CalculateCRC(dataBuffer, 16, &dataBuffer[16]);
+    PCD_CalculateCRC(dataBuffer, 16, &dataBuffer[16]);     // Manually calculate and "fill" the last 2 bytes of the 18-byte block
 
-		usleep(10000);		
-		status = MIFARE_WriteDataRaw(dataBuffer, 18);		
+	usleep(10000);		
+	status = MIFARE_WriteDataRaw(dataBuffer, 18);		
 
 	//status = MFRC522_TransceiveData(buffer, 18, NULL, 0, NULL, 0, 0);
 	if (status != MFRC522_STATUS_OK)
 	{
-    printf("transceive data didn't really sent: %d", status);
+    //printf("transceive data didn't really sent: %d", status);
 
     return status;
     }
-	printf("transceive data really sent: %d", status);
+	//printf("transceive data really sent: %d", status);
 
     return status;
 }
 
-MFRC522_statusCodes_t MIFARE_Read(PICC_Command_t key, byte blockAddr, byte *backData)
+MFRC522_statusCodes_t MIFARE_Read(PICC_Command_t key, byte blockAddr, byte *customKey, byte *backData)
 { 
 	MFRC522_statusCodes_t result;
 	MFRC522_statusCodes_t status;
@@ -781,7 +759,7 @@ MFRC522_statusCodes_t MIFARE_Read(PICC_Command_t key, byte blockAddr, byte *back
 	byte validBits = 0; 
     byte rxAlign = 0;
 
-	result = MIFARE_Authenticate(key, blockAddr, &UID_t);
+	result = MIFARE_Authenticate(key, blockAddr, customKey, &UID_t);
 	if(result != MFRC522_STATUS_AUTHEN )
 	{
 		return result;
@@ -798,14 +776,10 @@ MFRC522_statusCodes_t MIFARE_StopSession()
     byte haltBuffer[2];
     haltBuffer[0] = PICC_CMD_HALT; // 0x50
     haltBuffer[1] = 0;              // 0x00
-
    
     MFRC522_TransceiveData(haltBuffer, 2, NULL, 0, NULL, 0, false);
-
-    // 2. Tell the READER to stop the encryption (Crypto1)
-    // This clears bit 3 (0x08) of the Status2Reg.
-    MFRC522_ClearRegisterBitMask(Status2Reg, 0x08);
-
+    // Tell the READER to stop the encryption (Crypto1)
+    MFRC522_ClearRegisterBitMask(Status2Reg, 0x08);     // This clears bit 3 (0x08) of the Status2Reg.
     return MFRC522_STATUS_OK;
 }
 
