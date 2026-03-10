@@ -38,6 +38,7 @@ The system is built on a **Distributed Services** model, separating hardware-cri
 ```
 
 📋 Installation & Deployment
+```text
 Build System:
 make (Generates the Shared Library and binaries with RPATH linking)
 Initialize Databases:
@@ -51,6 +52,7 @@ Use code with caution.
 
 Monitor System Logs:
 sudo journalctl -u rfid_hw -u rfid_logic -f
+```
 
 ##  Hardware Verification
 To ensure SPI timing and signal integrity, the driver was verified using a **Logic Analyzer**. 
