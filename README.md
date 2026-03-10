@@ -63,5 +63,7 @@ The screenshots below shows the UID on MISO Line.
 📚 References & Resources
 
 Datasheet: NXP MFRC522 Official Data Sheet
+
 Technical Guide: MFRC522 Module Deep-Dive (GetToByte)
+
 Linux SPI Development: The Linux Kernel SPI Documentation
