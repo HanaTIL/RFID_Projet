@@ -36,6 +36,16 @@ The system is built on a **Distributed Services** model, separating hardware-cri
 ├── LICENSE              # MIT License
 └── README.md            # Documentation
 ```
+## 🔌 Hardware Setup & Configuration
+
+This project was developed and tested on a **Raspberry Pi Zero 2 W**. 
+
+###  Enable SPI Interface
+Before running the driver, the Linux SPI interface must be enabled via the kernel configuration tool:
+```bash
+sudo raspi-config
+# Navigate to: Interface Options -> SPI -> Enable -> Yes
+```
 
 📋 Installation & Deployment
 ```text
