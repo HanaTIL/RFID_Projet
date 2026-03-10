@@ -35,14 +35,7 @@ The system is built on a **Distributed Services** model, separating hardware-cri
 ├── .gitignore           # File exclusion rules
 ├── LICENSE              # MIT License
 └── README.md            # Documentation
-
-##  Hardware Verification
-To ensure SPI timing and signal integrity, the driver was verified using a **Logic Analyzer**. 
-The screenshots below confirm the 1MHz clock stability and the MOSI/MISO handshake during a MIFARE Authenticate command.
-
-![SPI Logic Trace](docs/logic_analyzer_capture.png)
-
-
+```
 
 📋 Installation & Deployment
 Build System:
@@ -59,6 +52,11 @@ Use code with caution.
 Monitor System Logs:
 sudo journalctl -u rfid_hw -u rfid_logic -f
 
+##  Hardware Verification
+To ensure SPI timing and signal integrity, the driver was verified using a **Logic Analyzer**. 
+The screenshots below confirm the 1MHz clock stability and the MOSI/MISO handshake during a MIFARE Authenticate command.
+
+![SPI Logic Trace](docs/logic_analyzer_capture.png)
 
 📚 References & Resources
 Datasheet: NXP MFRC522 Official Data Sheet
