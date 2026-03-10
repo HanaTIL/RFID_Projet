@@ -47,8 +47,8 @@ Install System Services:
 bash
 sudo cp *.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now rfid_hw.service rfid_logic.service
-Use code with caution.
+sudo systemctl enable rfid_hw.service rfid_logic.service
+sudo systemctl start rfid_hw rfid_logic
 
 Monitor System Logs:
 sudo journalctl -u rfid_hw -u rfid_logic -f
