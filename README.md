@@ -35,16 +35,20 @@ The system is built on a **Distributed Services** model, separating hardware-cri
 ├── .gitignore           # File exclusion rules
 ├── LICENSE              # MIT License
 └── README.md            # Documentation
+```
+## 🔌 Hardware Setup & Configuration
 
-##  Hardware Verification
-To ensure SPI timing and signal integrity, the driver was verified using a **Logic Analyzer**. 
-The screenshots below confirm the 1MHz clock stability and the MOSI/MISO handshake during a MIFARE Authenticate command.
+This project was developed and tested on a **Raspberry Pi Zero 2 W**. 
 
-![SPI Logic Trace](docs/logic_analyzer_capture.png)
-
-
+###  Enable SPI Interface
+Before running the driver, the Linux SPI interface must be enabled via the kernel configuration tool:
+```bash
+sudo raspi-config
+# Navigate to: Interface Options -> SPI -> Enable -> Yes
+```
 
 📋 Installation & Deployment
+```text
 Build System:
 make (Generates the Shared Library and binaries with RPATH linking)
 Initialize Databases:
@@ -53,14 +57,23 @@ Install System Services:
 bash
 sudo cp *.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now rfid_hw.service rfid_logic.service
-Use code with caution.
+sudo systemctl enable rfid_hw.service rfid_logic.service
+sudo systemctl start rfid_hw rfid_logic
 
 Monitor System Logs:
 sudo journalctl -u rfid_hw -u rfid_logic -f
+```
 
+##  Hardware Verification
+To ensure SPI timing and signal integrity, the driver was verified using a **Logic Analyzer**. 
+The screenshot below shows the UID on MISO Line.
+
+![SPI Logic Trace](docs/logic_analyzer_capture.png)
 
 📚 References & Resources
+
 Datasheet: NXP MFRC522 Official Data Sheet
+
 Technical Guide: MFRC522 Module Deep-Dive (GetToByte)
+
 Linux SPI Development: The Linux Kernel SPI Documentation
